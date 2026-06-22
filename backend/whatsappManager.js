@@ -166,7 +166,7 @@ class WhatsAppManager {
           new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching chats')), 180000))
         ]);
         return chats
-          .filter(c => c.id._serialized !== 'status@broadcast')
+          .filter(c => c.id._serialized !== 'status@broadcast' && !c.isGroup)
           .map(c => ({
             id: c.id._serialized,
             name: c.name || c.id.user,
