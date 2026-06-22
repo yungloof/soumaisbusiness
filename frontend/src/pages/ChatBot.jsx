@@ -20,9 +20,6 @@ const ChatBot = () => {
 
   const socketRef = useRef();
   const messagesEndRef = useRef(null);
-  const user = JSON.parse(localStorage.getItem('user')) || {};
-  const isMaster = user.role === 'MASTER';
-  const companyQuery = isMaster ? '?companyId=1' : '';
   const token = localStorage.getItem('token');
 
   // Polling Connection Status
@@ -87,14 +84,14 @@ const ChatBot = () => {
 
   const pollWaStatus = async () => {
     try {
-      const res = await fetch(`/api/whatsapp/status${companyQuery}`, {
+      const res = await fetch('/api/whatsapp/status', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.status) {
         setWaStatus(data.status);
         if (data.status === 'QR_READY') {
-          fetchQrCode(companyQuery);
+          fetchQrCode();
         }
       }
     } catch (err) {
@@ -102,9 +99,9 @@ const ChatBot = () => {
     }
   };
 
-  const fetchQrCode = async (query) => {
+  const fetchQrCode = async () => {
     try {
-      const res = await fetch(`/api/whatsapp/qr${query}`, {
+      const res = await fetch('/api/whatsapp/qr', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -119,11 +116,10 @@ const ChatBot = () => {
   const startWaSession = async () => {
     setLoadingWa(true);
     try {
-      const body = isMaster ? JSON.stringify({ companyId: 1 }) : '{}';
       await fetch('/api/whatsapp/start', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body
+        body: '{}'
       });
     } catch (err) {
       console.error(err);
@@ -134,11 +130,10 @@ const ChatBot = () => {
 
   const logoutWaSession = async () => {
     try {
-      const body = isMaster ? JSON.stringify({ companyId: 1 }) : '{}';
       await fetch('/api/whatsapp/logout', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body
+        body: '{}'
       });
       setWaStatus('DISCONNECTED');
       setQrCode(null);
@@ -152,7 +147,7 @@ const ChatBot = () => {
   const fetchChats = async () => {
     setLoadingChats(true);
     try {
-      const res = await fetch(`/api/whatsapp/chats${companyQuery}`, {
+      const res = await fetch('/api/whatsapp/chats', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -180,7 +175,7 @@ const ChatBot = () => {
     setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unreadCount: 0 } : c));
 
     try {
-      const res = await fetch(`/api/whatsapp/chats/${chat.id}/messages${companyQuery}`, {
+      const res = await fetch(`/api/whatsapp/chats/${chat.id}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -232,11 +227,10 @@ const ChatBot = () => {
     setSending(true);
 
     try {
-      const bodyPayload = isMaster ? { companyId: 1, message: msgText } : { message: msgText };
       const res = await fetch(`/api/whatsapp/chats/${activeChat.id}/send`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyPayload)
+        body: JSON.stringify({ message: msgText })
       });
       const data = await res.json();
       if (!data.success) {

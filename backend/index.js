@@ -180,45 +180,53 @@ app.get('/api/fontedata/consulta/:endpoint', authenticateToken, async (req, res)
 });
 
 // WhatsApp API Routes
-app.post('/api/whatsapp/start', authenticateToken, async (req, res) => {
-  // companyId will be either the logged in user's company_id, or if they are MASTER, a passed in companyId
-  // For simplicity, if role is CLIENTE, force their companyId. If MASTER, use req.body.companyId
-  const companyId = req.user.role === 'MASTER' ? req.body.companyId : req.user.company_id || req.user.id;
-  
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+// Helper: resolve the whatsapp session key from the JWT.
+// For now, every user gets their own session keyed by their user.id.
+// If a MASTER wants to manage a specific company, they can still pass companyId.
+function getWaCompanyId(req) {
+  if (req.user.role === 'MASTER') {
+    // Check body first (POST), then query (GET)
+    const fromBody = req.body?.companyId;
+    const fromQuery = req.query?.companyId;
+    return fromBody || fromQuery || req.user.id;
+  }
+  return req.user.id;
+}
 
-  const status = await WhatsAppManager.startSession(companyId);
-  res.json({ status });
+app.post('/api/whatsapp/start', authenticateToken, async (req, res) => {
+  const companyId = getWaCompanyId(req);
+  try {
+    const status = await WhatsAppManager.startSession(companyId);
+    res.json({ status });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/whatsapp/status', authenticateToken, async (req, res) => {
-  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
-
+  const companyId = getWaCompanyId(req);
   const status = WhatsAppManager.getStatus(companyId);
-  res.json({ status });
+  res.json({ status, companyId });
 });
 
 app.get('/api/whatsapp/qr', authenticateToken, async (req, res) => {
-  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
-
+  const companyId = getWaCompanyId(req);
   const qrCodeBase64 = WhatsAppManager.getQrCode(companyId);
   res.json({ qrCodeBase64 });
 });
 
 app.post('/api/whatsapp/logout', authenticateToken, async (req, res) => {
-  const companyId = req.user.role === 'MASTER' ? req.body.companyId : req.user.company_id || req.user.id;
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
-
-  await WhatsAppManager.logoutSession(companyId);
-  res.json({ success: true });
+  const companyId = getWaCompanyId(req);
+  try {
+    await WhatsAppManager.logoutSession(companyId);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/whatsapp/chats', authenticateToken, async (req, res) => {
-  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
-  
+  const companyId = getWaCompanyId(req);
   try {
     const chats = await WhatsAppManager.getChats(companyId);
     res.json({ chats });
@@ -228,9 +236,7 @@ app.get('/api/whatsapp/chats', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/whatsapp/chats/:chatId/messages', authenticateToken, async (req, res) => {
-  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
-  
+  const companyId = getWaCompanyId(req);
   try {
     const limit = parseInt(req.query.limit) || 50;
     const messages = await WhatsAppManager.getMessages(companyId, req.params.chatId, limit);
@@ -241,9 +247,7 @@ app.get('/api/whatsapp/chats/:chatId/messages', authenticateToken, async (req, r
 });
 
 app.post('/api/whatsapp/chats/:chatId/send', authenticateToken, async (req, res) => {
-  const companyId = req.user.role === 'MASTER' ? req.body.companyId : req.user.company_id || req.user.id;
-  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
-  
+  const companyId = getWaCompanyId(req);
   try {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: 'Message is required' });
