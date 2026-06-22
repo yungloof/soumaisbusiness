@@ -35,7 +35,7 @@ const CadastroFuncionario = () => {
     setCpfData(null);
     try {
       const cleanCpf = formData.cpf.replace(/\D/g, '');
-      const response = await fetch(`http://localhost:3001/api/fontedata/cpf/${cleanCpf}`, {
+      const response = await fetch(`/api/fontedata/cpf/${cleanCpf}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();

@@ -72,7 +72,7 @@ const ConsultasCredito = () => {
     setResultado(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/fontedata/consulta/${item.endpoint}?${item.param}=${cleanDoc}`, {
+      const response = await fetch(`/api/fontedata/consulta/${item.endpoint}?${item.param}=${cleanDoc}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

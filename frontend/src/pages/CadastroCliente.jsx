@@ -31,7 +31,7 @@ const CadastroCliente = () => {
       const token = localStorage.getItem('token');
       // Clean CNPJ (only numbers)
       const cleanCnpj = formData.cnpj.replace(/\D/g, '');
-      const response = await fetch(`http://localhost:3001/api/fontedata/cnpj/${cleanCnpj}`, {
+      const response = await fetch(`/api/fontedata/cnpj/${cleanCnpj}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -63,7 +63,7 @@ const CadastroCliente = () => {
     try {
       const token = localStorage.getItem('token');
       const cleanCnpj = formData.cnpj.replace(/\D/g, '');
-      const response = await fetch(`http://localhost:3001/api/fontedata/score/${cleanCnpj}`, {
+      const response = await fetch(`/api/fontedata/score/${cleanCnpj}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -95,7 +95,7 @@ const CadastroCliente = () => {
     try {
       const token = localStorage.getItem('token');
       const cleanCnpj = formData.cnpj.replace(/\D/g, '');
-      const response = await fetch(`http://localhost:3001/api/fontedata/pgfn/${cleanCnpj}`, {
+      const response = await fetch(`/api/fontedata/pgfn/${cleanCnpj}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
