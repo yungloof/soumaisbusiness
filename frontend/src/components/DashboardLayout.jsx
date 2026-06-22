@@ -24,6 +24,7 @@ const navMaster = [
       { id: 'financeiro', path: '/master/financeiro', icon: DollarSign, label: 'Faturamento / Recebimentos', module: 'financeiro' },
       { id: 'chamados', path: '/master/chamados', icon: LifeBuoy, label: 'Gestão de Chamados (Suporte)', module: 'chamados' },
       { id: 'acesso', path: '/master/acesso', icon: ShieldCheck, label: 'Permissões de Acesso Interno', module: 'all' },
+      { id: 'consultas-credito', path: '/master/consultas-credito', icon: CreditCard, label: 'Consultas de Crédito', module: 'all' },
     ]
   }
 ];
@@ -50,7 +51,6 @@ const navParceiro = [
       { id: 'cotacao', path: '/master/cotacao', icon: ClipboardList, label: 'Sistema de Cotação', module: 'all' },
       { id: 'marketplace', path: '/master/marketplace', icon: Store, label: 'Marketplace SOU+BLU', module: 'marketplace' },
       { id: 'chatbot', path: '/master/chatbot', icon: MessageSquare, label: 'Caixa de Entrada / WhatsApp', module: 'all' },
-      { id: 'consultas-credito', path: '/master/consultas-credito', icon: CreditCard, label: 'Consultas de Crédito', module: 'all' },
     ]
   },
   {
