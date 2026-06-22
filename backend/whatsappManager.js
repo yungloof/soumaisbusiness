@@ -32,9 +32,7 @@ class WhatsAppManager {
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--disable-extensions',
-          '--single-process'
+          '--disable-gpu'
         ]
       }
     });
