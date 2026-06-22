@@ -7,6 +7,7 @@ const WebChat = () => {
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [waStatus, setWaStatus] = useState('DISCONNECTED');
@@ -42,7 +43,7 @@ const WebChat = () => {
 
     // Setup Socket.io
     const apiUrl = import.meta.env.VITE_API_URL || '';
-    socketRef.current = io(apiUrl);
+    socketRef.current = io(apiUrl, { path: '/api/socket.io' });
 
     socketRef.current.on('whatsapp-message', (data) => {
       const { message } = data;
@@ -108,6 +109,7 @@ const WebChat = () => {
 
   const selectChat = async (chat) => {
     setActiveChat(chat);
+    setMessages([]);
     setLoadingMessages(true);
     
     // Reset unread count locally
@@ -190,6 +192,8 @@ const WebChat = () => {
       return prev;
     });
     
+    // Clear searchTerm so the new chat shows up if searching
+    setSearchTerm('');
     selectChat(newChat);
   };
 
@@ -220,8 +224,10 @@ const WebChat = () => {
             <Search size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: 10 }} />
             <input 
               type="text" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar contato..." 
-              style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: 999, border: '1px solid var(--border-color)', background: '#f3f4f6', fontSize: '0.9rem' }}
+              style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: 999, border: '1px solid var(--border-color)', background: '#f3f4f6', fontSize: '0.9rem', outline: 'none' }}
             />
           </div>
         </div>
@@ -232,7 +238,7 @@ const WebChat = () => {
               <Loader2 className="animate-spin" size={32} color="var(--primary-red)" />
             </div>
           ) : (
-            chats.map(chat => (
+            chats.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.id.includes(searchTerm)).map(chat => (
               <div 
                 key={chat.id} 
                 onClick={() => selectChat(chat)}

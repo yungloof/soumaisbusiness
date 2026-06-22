@@ -123,6 +123,7 @@ app.get('/api/fontedata/score/:documento', authenticateToken, async (req, res) =
 
 const server = http.createServer(app);
 const io = new Server(server, {
+  path: '/api/socket.io',
   cors: {
     origin: '*', // Adjust for production
     methods: ['GET', 'POST']
