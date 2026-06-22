@@ -29,7 +29,7 @@ const DashboardMaster = () => {
         <div className="sidebar-header">
           <div className="login-logo" style={{ marginBottom: 0, fontSize: '1rem' }}>
             <div className="logo-icon" style={{ width: '24px', height: '24px', fontSize: '1rem', borderRadius: '4px' }}>B</div>
-            SOU + BLU
+            SOU + BUSINESS
           </div>
           <div style={{ marginTop: '1rem' }}>
             <span style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>MASTER</span>

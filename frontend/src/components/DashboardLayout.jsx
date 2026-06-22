@@ -17,7 +17,7 @@ const navMaster = [
     ]
   },
   {
-    label: 'ADMINISTRAÇÃO SOU+BLU',
+    label: 'ADMINISTRAÇÃO SOU+BUSINESS',
     items: [
       { id: 'supervisores', path: '/master/supervisores', icon: Users, label: 'Gestão de Supervisores', module: 'all' },
       { id: 'funcionarios-novo', path: '/master/funcionarios/novo', icon: UserPlus, label: 'Novo Colaborador Interno', module: 'all' },
@@ -49,7 +49,7 @@ const navParceiro = [
     items: [
       { id: 'fornecedores', path: '/master/fornecedores', icon: Package, label: 'Meus Fornecedores', module: 'all' },
       { id: 'cotacao', path: '/master/cotacao', icon: ClipboardList, label: 'Sistema de Cotação', module: 'all' },
-      { id: 'marketplace', path: '/master/marketplace', icon: Store, label: 'Marketplace SOU+BLU', module: 'marketplace' },
+      { id: 'marketplace', path: '/master/marketplace', icon: Store, label: 'Marketplace SOU+BUSINESS', module: 'marketplace' },
       { id: 'chatbot', path: '/master/chatbot', icon: MessageSquare, label: 'Caixa de Entrada / WhatsApp', module: 'all' },
     ]
   },
@@ -89,7 +89,7 @@ const DashboardLayout = () => {
       <aside className="sidebar" style={{ overflowY: 'auto' }}>
         <div className="sidebar-header">
           <div className="logo-container">
-            <span className="logo-text">SOU <span style={{color: 'var(--primary-red)'}}>+</span> BLU</span>
+            <span className="logo-text">SOU <span style={{color: 'var(--primary-red)'}}>+</span> BUSINESS</span>
           </div>
           <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ backgroundColor: simularParceiro ? '#f59e0b' : '#1a1a1a', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>

@@ -457,7 +457,7 @@ const ChatBot = () => {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
                   <MessageSquare size={80} style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
-                  <h2 style={{ fontSize: '1.5rem', fontWeight: 300 }}>SOU+BLU Caixa de Entrada</h2>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 300 }}>SOU+BUSINESS Caixa de Entrada</h2>
                   <p>Selecione uma conversa na lateral para começar.</p>
                 </div>
               )}

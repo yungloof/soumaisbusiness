@@ -47,7 +47,7 @@ const Login = () => {
         <div className="login-left">
           <div className="login-logo">
             <div className="logo-icon">B</div>
-            SOU + BLU
+            SOU + BUSINESS
           </div>
           
           <div className="badge-mentoria">MENTORIA IFOOD</div>

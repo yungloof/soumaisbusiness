@@ -12,7 +12,7 @@ const MODULOS_SISTEMA = [
   { id: 'consultas-credito', label: 'Consultas de Dados Cadastrais', descricao: 'Antifraude, Serasa, SCR e Certidões', icon: '🔍' },
   { id: 'chamados', label: 'Gestão de Chamados', descricao: 'Abertura e acompanhamento de tickets', icon: '🎫' },
   { id: 'financeiro', label: 'BPO Financeiro', descricao: 'Pagamentos, cobranças e extrato', icon: '💰' },
-  { id: 'marketplace', label: 'Marketplace BLU', descricao: 'Loja de serviços e produtos parceiros', icon: '🛒' },
+  { id: 'marketplace', label: 'Marketplace SOU+BUSINESS', descricao: 'Loja de serviços e produtos parceiros', icon: '🛒' },
   { id: 'fornecedores', label: 'Fornecedor', descricao: 'Cadastro, cotação e pagamento de fornecedores', icon: '📦' },
 ];
 

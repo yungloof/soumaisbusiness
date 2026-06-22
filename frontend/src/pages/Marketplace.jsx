@@ -94,7 +94,7 @@ const Marketplace = () => {
   return (
     <>
       <header className="topbar">
-        <div className="page-title">Marketplace BLU</div>
+        <div className="page-title">Marketplace SOU+BUSINESS</div>
         <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>{totalServicos} serviços disponíveis</span>
       </header>
 
@@ -102,7 +102,7 @@ const Marketplace = () => {
         {/* Banner */}
         <div style={{ background: 'linear-gradient(135deg, #ea1d2c 0%, #c41824 100%)', borderRadius: 16, padding: '2rem', marginBottom: '2rem', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Serviços & Parceiros SOU+BLU</h1>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Serviços & Parceiros SOU+BUSINESS</h1>
             <p style={{ opacity: 0.9, maxWidth: 480 }}>Contrate serviços extras para impulsionar a operação de cada restaurante da sua rede.</p>
           </div>
           <div style={{ display: 'flex', gap: '1rem' }}>

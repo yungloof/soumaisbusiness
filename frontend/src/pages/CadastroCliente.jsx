@@ -288,7 +288,7 @@ const CadastroCliente = () => {
               <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Consultas de Crédito</label>
               <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Fornecedor</label>
               <label className="flex items-center gap-2"><input type="checkbox" /> BPO Financeiro (A contratar)</label>
-              <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Marketplace BLU</label>
+              <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Marketplace SOU+BUSINESS</label>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
