@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
+const WhatsAppManager = require('./whatsappManager');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -158,5 +159,41 @@ app.get('/api/fontedata/consulta/:endpoint', authenticateToken, async (req, res)
     console.error(`FonteData Consulta Error [${req.params.endpoint}]:`, error.response?.status, error.response?.data);
     res.status(error.response?.status || 500).json(error.response?.data || { error: 'FonteData API error' });
   }
+});
+
+// WhatsApp API Routes
+app.post('/api/whatsapp/start', authenticateToken, async (req, res) => {
+  // companyId will be either the logged in user's company_id, or if they are MASTER, a passed in companyId
+  // For simplicity, if role is CLIENTE, force their companyId. If MASTER, use req.body.companyId
+  const companyId = req.user.role === 'MASTER' ? req.body.companyId : req.user.company_id || req.user.id;
+  
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+
+  const status = await WhatsAppManager.startSession(companyId);
+  res.json({ status });
+});
+
+app.get('/api/whatsapp/status', authenticateToken, async (req, res) => {
+  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+
+  const status = WhatsAppManager.getStatus(companyId);
+  res.json({ status });
+});
+
+app.get('/api/whatsapp/qr', authenticateToken, async (req, res) => {
+  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+
+  const qrCodeBase64 = WhatsAppManager.getQrCode(companyId);
+  res.json({ qrCodeBase64 });
+});
+
+app.post('/api/whatsapp/logout', authenticateToken, async (req, res) => {
+  const companyId = req.user.role === 'MASTER' ? req.body.companyId : req.user.company_id || req.user.id;
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+
+  await WhatsAppManager.logoutSession(companyId);
+  res.json({ success: true });
 });
 
