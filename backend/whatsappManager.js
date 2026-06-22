@@ -1,5 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
+const fs = require('fs');
+const path = require('path');
 
 // Memory store for clients and their statuses
 const sessions = {}; 
@@ -125,12 +127,26 @@ class WhatsAppManager {
   static async logoutSession(companyId) {
     if (sessions[companyId] && sessions[companyId].client) {
       try {
+        // Send logout command to WhatsApp servers (unlinks from the phone)
         await sessions[companyId].client.logout();
       } catch (err) {
         console.error('Error logging out:', err);
-        sessions[companyId].client.destroy();
+      } finally {
+        try {
+          await sessions[companyId].client.destroy();
+        } catch(e) {}
       }
       delete sessions[companyId];
+    }
+    
+    // Force delete the local auth folder to ensure a clean state
+    try {
+      const authPath = path.join(__dirname, '.wwebjs_auth', `session-company_${companyId}`);
+      if (fs.existsSync(authPath)) {
+        fs.rmSync(authPath, { recursive: true, force: true });
+      }
+    } catch (err) {
+      console.error('Error deleting auth folder:', err);
     }
   }
 
