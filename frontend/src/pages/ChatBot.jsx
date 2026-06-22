@@ -17,6 +17,7 @@ const ChatBot = () => {
   const [loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+  const [chatError, setChatError] = useState(null);
 
   const socketRef = useRef();
   const messagesEndRef = useRef(null);
@@ -146,6 +147,7 @@ const ChatBot = () => {
 
   const fetchChats = async () => {
     setLoadingChats(true);
+    setChatError(null);
     try {
       const res = await fetch('/api/whatsapp/chats', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -155,12 +157,11 @@ const ChatBot = () => {
         setChats(data.chats);
       } else if (data.error) {
         console.error('API Error:', data.error);
-        if (data.error === 'Timeout fetching chats' || data.error.includes('Timeout')) {
-          alert('O servidor demorou muito para carregar as mensagens. Reinicie a conexão ou tente novamente mais tarde.');
-        }
+        setChatError(data.error);
       }
     } catch (err) {
       console.error('Error fetching chats:', err);
+      setChatError('Erro de rede ao carregar conversas.');
     } finally {
       setLoadingChats(false);
     }
@@ -330,8 +331,16 @@ const ChatBot = () => {
 
               <div style={{ flex: 1, overflowY: 'auto' }}>
                 {loadingChats ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', gap: '0.5rem' }}>
                     <Loader2 className="animate-spin" size={32} color="var(--primary-red)" />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Carregando conversas...</span>
+                  </div>
+                ) : chatError ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', gap: '1rem', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.9rem', color: '#ef4444' }}>Erro ao carregar conversas.</p>
+                    <button onClick={fetchChats} style={{ padding: '0.5rem 1.5rem', background: 'var(--primary-red)', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+                      Tentar Novamente
+                    </button>
                   </div>
                 ) : (
                   chats.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.id.includes(searchTerm)).map(chat => (
