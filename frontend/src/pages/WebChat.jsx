@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Send, User, MessageSquare, Loader2, ArrowLeft } from 'lucide-react';
+import { Search, Send, User, MessageSquare, Loader2, Plus } from 'lucide-react';
 import { io } from 'socket.io-client';
 
 const WebChat = () => {
@@ -161,6 +161,38 @@ const WebChat = () => {
     }
   };
 
+  const startNewChat = () => {
+    let number = prompt('Digite o número do WhatsApp com DDD (ex: 11999999999):');
+    if (!number) return;
+    
+    // Remove non-numeric characters
+    number = number.replace(/\D/g, '');
+    
+    // If it doesn't have country code for Brazil, add it (55)
+    if (number.length === 10 || number.length === 11) {
+      number = '55' + number;
+    }
+    
+    const chatId = `${number}@c.us`;
+    const newChat = {
+      id: chatId,
+      name: `+${number}`,
+      lastMessage: null,
+      unreadCount: 0,
+      timestamp: Math.floor(Date.now() / 1000)
+    };
+    
+    // Add to chats if not exists
+    setChats(prev => {
+      if (!prev.find(c => c.id === chatId)) {
+        return [newChat, ...prev];
+      }
+      return prev;
+    });
+    
+    selectChat(newChat);
+  };
+
   if (waStatus !== 'CONNECTED') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', textAlign: 'center' }}>
@@ -178,7 +210,12 @@ const WebChat = () => {
       {/* Sidebar - Chats List */}
       <div style={{ width: 350, borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', background: '#f9fafb' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', background: 'white' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-main)' }}>Conversas</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-main)' }}>Conversas</h2>
+            <button onClick={startNewChat} style={{ background: '#25D366', color: 'white', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} title="Nova Conversa">
+              <Plus size={18} />
+            </button>
+          </div>
           <div style={{ position: 'relative' }}>
             <Search size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: 10 }} />
             <input 
