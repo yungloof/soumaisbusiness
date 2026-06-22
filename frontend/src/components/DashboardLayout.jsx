@@ -79,8 +79,9 @@ const DashboardLayout = () => {
 
   const isVisible = (module) => user.role === 'MASTER' || user.modules?.includes('all') || user.modules?.includes(module);
 
-  // Seleciona o menu baseado no estado de simulação
-  const activeNavGroups = simularParceiro ? navParceiro : navMaster;
+  // Seleciona o menu baseado no estado de simulação ou no papel do usuário
+  const isCliente = user.role === 'CLIENTE';
+  const activeNavGroups = (simularParceiro || isCliente) ? navParceiro : navMaster;
 
   return (
     <div className="dashboard-layout">
