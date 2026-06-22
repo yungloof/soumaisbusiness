@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
+const http = require('http');
+const { Server } = require('socket.io');
 const WhatsAppManager = require('./whatsappManager');
 
 const prisma = new PrismaClient();
@@ -119,7 +121,22 @@ app.get('/api/fontedata/score/:documento', authenticateToken, async (req, res) =
   }
 });
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Adjust for production
+    methods: ['GET', 'POST']
+  }
+});
+
+// Expose io to the request object if needed, and to WhatsAppManager
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+WhatsAppManager.setIo(io);
+
+server.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
 
@@ -195,5 +212,45 @@ app.post('/api/whatsapp/logout', authenticateToken, async (req, res) => {
 
   await WhatsAppManager.logoutSession(companyId);
   res.json({ success: true });
+});
+
+app.get('/api/whatsapp/chats', authenticateToken, async (req, res) => {
+  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+  
+  try {
+    const chats = await WhatsAppManager.getChats(companyId);
+    res.json({ chats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/whatsapp/chats/:chatId/messages', authenticateToken, async (req, res) => {
+  const companyId = req.user.role === 'MASTER' ? req.query.companyId : req.user.company_id || req.user.id;
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+  
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const messages = await WhatsAppManager.getMessages(companyId, req.params.chatId, limit);
+    res.json({ messages });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/whatsapp/chats/:chatId/send', authenticateToken, async (req, res) => {
+  const companyId = req.user.role === 'MASTER' ? req.body.companyId : req.user.company_id || req.user.id;
+  if (!companyId) return res.status(400).json({ error: 'Company ID required' });
+  
+  try {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message is required' });
+    
+    const sentMsg = await WhatsAppManager.sendMessage(companyId, req.params.chatId, message);
+    res.json({ success: true, message: sentMsg });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 

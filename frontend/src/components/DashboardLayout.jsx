@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Building2, UserPlus, FilePlus, MenuSquare,
   Receipt, Store, GraduationCap, DollarSign, LogOut, Package,
-  ClipboardList, MessageCircle, CreditCard, ChevronDown, ChevronRight,
+  ClipboardList, MessageCircle, MessageSquare, CreditCard, ChevronDown, ChevronRight,
   ShieldCheck, LifeBuoy
 } from 'lucide-react';
 import '../pages/DashboardMaster.css';
@@ -49,7 +49,8 @@ const navParceiro = [
       { id: 'fornecedores', path: '/master/fornecedores', icon: Package, label: 'Meus Fornecedores', module: 'all' },
       { id: 'cotacao', path: '/master/cotacao', icon: ClipboardList, label: 'Sistema de Cotação', module: 'all' },
       { id: 'marketplace', path: '/master/marketplace', icon: Store, label: 'Marketplace SOU+BLU', module: 'marketplace' },
-      { id: 'chatbot', path: '/master/chatbot', icon: MessageCircle, label: 'Chat / WhatsApp Bot', module: 'all' },
+      { id: 'chatbot', path: '/master/chatbot', icon: MessageCircle, label: 'Conexão WhatsApp', module: 'all' },
+      { id: 'webchat', path: '/master/webchat', icon: MessageSquare, label: 'Caixa de Entrada', module: 'all' },
       { id: 'consultas-credito', path: '/master/consultas-credito', icon: CreditCard, label: 'Consultas de Crédito', module: 'all' },
     ]
   },

@@ -6,6 +6,12 @@ const sessions = {};
 // { companyId: { client: Client, status: 'DISCONNECTED'|'INITIALIZING'|'QR_READY'|'CONNECTED', qrCodeBase64: null } }
 
 class WhatsAppManager {
+  static io = null;
+
+  static setIo(ioInstance) {
+    this.io = ioInstance;
+  }
+
   static async startSession(companyId) {
     if (sessions[companyId]) {
       return sessions[companyId].status;
@@ -63,7 +69,37 @@ class WhatsAppManager {
     });
 
     client.on('message', async msg => {
-      // Manual conversations for now. A future flow system will be built here.
+      // Broadcast incoming message via Socket.io
+      if (WhatsAppManager.io) {
+        WhatsAppManager.io.emit('whatsapp-message', {
+          companyId,
+          message: {
+            id: msg.id._serialized,
+            chatId: msg.from,
+            body: msg.body,
+            fromMe: msg.fromMe,
+            timestamp: msg.timestamp,
+            type: msg.type
+          }
+        });
+      }
+    });
+
+    client.on('message_create', async msg => {
+      // Broadcast messages sent by me (e.g. from the physical phone)
+      if (msg.fromMe && WhatsAppManager.io) {
+        WhatsAppManager.io.emit('whatsapp-message', {
+          companyId,
+          message: {
+            id: msg.id._serialized,
+            chatId: msg.to,
+            body: msg.body,
+            fromMe: msg.fromMe,
+            timestamp: msg.timestamp,
+            type: msg.type
+          }
+        });
+      }
     });
 
     try {
@@ -96,6 +132,50 @@ class WhatsAppManager {
       }
       delete sessions[companyId];
     }
+  }
+
+  static async getChats(companyId) {
+    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED') {
+      throw new Error('WhatsApp not connected');
+    }
+    const chats = await sessions[companyId].client.getChats();
+    return chats.map(c => ({
+      id: c.id._serialized,
+      name: c.name || c.id.user,
+      unreadCount: c.unreadCount,
+      timestamp: c.timestamp,
+      lastMessage: c.lastMessage ? { body: c.lastMessage.body } : null,
+      isGroup: c.isGroup
+    }));
+  }
+
+  static async getMessages(companyId, chatId, limit = 50) {
+    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED') {
+      throw new Error('WhatsApp not connected');
+    }
+    const chat = await sessions[companyId].client.getChatById(chatId);
+    const messages = await chat.fetchMessages({ limit });
+    return messages.map(m => ({
+      id: m.id._serialized,
+      body: m.body,
+      fromMe: m.fromMe,
+      timestamp: m.timestamp,
+      type: m.type,
+      author: m.author
+    }));
+  }
+
+  static async sendMessage(companyId, chatId, text) {
+    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED') {
+      throw new Error('WhatsApp not connected');
+    }
+    const msg = await sessions[companyId].client.sendMessage(chatId, text);
+    return {
+      id: msg.id._serialized,
+      body: msg.body,
+      fromMe: msg.fromMe,
+      timestamp: msg.timestamp
+    };
   }
 }
 
