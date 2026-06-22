@@ -163,16 +163,18 @@ class WhatsAppManager {
       try {
         const chats = await Promise.race([
           sessions[companyId].client.getChats(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching chats')), 45000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching chats')), 180000))
         ]);
-        return chats.map(c => ({
-          id: c.id._serialized,
-          name: c.name || c.id.user,
-          unreadCount: c.unreadCount,
-          timestamp: c.timestamp,
-          lastMessage: c.lastMessage ? { body: c.lastMessage.body } : null,
-          isGroup: c.isGroup
-        }));
+        return chats
+          .filter(c => c.id._serialized !== 'status@broadcast')
+          .map(c => ({
+            id: c.id._serialized,
+            name: c.name || c.id.user,
+            unreadCount: c.unreadCount,
+            timestamp: c.timestamp,
+            lastMessage: c.lastMessage ? { body: c.lastMessage.body } : null,
+            isGroup: c.isGroup
+          }));
       } catch (err) {
         console.error(`getChats attempt ${attempt + 1} error:`, err.message);
         if (attempt < retries) {
@@ -191,11 +193,11 @@ class WhatsAppManager {
     try {
       const chat = await Promise.race([
         sessions[companyId].client.getChatById(chatId),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout getting chat')), 30000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout getting chat')), 60000))
       ]);
       const messages = await Promise.race([
         chat.fetchMessages({ limit }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching messages')), 30000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching messages')), 180000))
       ]);
       return messages.map(m => ({
         id: m.id._serialized,

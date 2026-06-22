@@ -181,7 +181,7 @@ const ChatBot = () => {
       });
       const data = await res.json();
       if (data.messages) {
-        setMessages(data.messages.reverse());
+        setMessages(data.messages);
       }
     } catch (err) {
       console.error('Error fetching messages:', err);
