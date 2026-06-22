@@ -135,34 +135,53 @@ class WhatsAppManager {
   }
 
   static async getChats(companyId) {
-    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED') {
+    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED' || !sessions[companyId].client) {
       throw new Error('WhatsApp not connected');
     }
-    const chats = await sessions[companyId].client.getChats();
-    return chats.map(c => ({
-      id: c.id._serialized,
-      name: c.name || c.id.user,
-      unreadCount: c.unreadCount,
-      timestamp: c.timestamp,
-      lastMessage: c.lastMessage ? { body: c.lastMessage.body } : null,
-      isGroup: c.isGroup
-    }));
+    try {
+      const chats = await Promise.race([
+        sessions[companyId].client.getChats(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching chats')), 15000))
+      ]);
+      return chats.map(c => ({
+        id: c.id._serialized,
+        name: c.name || c.id.user,
+        unreadCount: c.unreadCount,
+        timestamp: c.timestamp,
+        lastMessage: c.lastMessage ? { body: c.lastMessage.body } : null,
+        isGroup: c.isGroup
+      }));
+    } catch (err) {
+      console.error('getChats error:', err);
+      throw err;
+    }
   }
 
   static async getMessages(companyId, chatId, limit = 50) {
-    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED') {
+    if (!sessions[companyId] || sessions[companyId].status !== 'CONNECTED' || !sessions[companyId].client) {
       throw new Error('WhatsApp not connected');
     }
-    const chat = await sessions[companyId].client.getChatById(chatId);
-    const messages = await chat.fetchMessages({ limit });
-    return messages.map(m => ({
-      id: m.id._serialized,
-      body: m.body,
-      fromMe: m.fromMe,
-      timestamp: m.timestamp,
-      type: m.type,
-      author: m.author
-    }));
+    try {
+      const chat = await Promise.race([
+        sessions[companyId].client.getChatById(chatId),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout getting chat')), 15000))
+      ]);
+      const messages = await Promise.race([
+        chat.fetchMessages({ limit }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout fetching messages')), 15000))
+      ]);
+      return messages.map(m => ({
+        id: m.id._serialized,
+        body: m.body,
+        fromMe: m.fromMe,
+        timestamp: m.timestamp,
+        type: m.type,
+        author: m.author
+      }));
+    } catch (err) {
+      console.error('getMessages error:', err);
+      throw err;
+    }
   }
 
   static async sendMessage(companyId, chatId, text) {

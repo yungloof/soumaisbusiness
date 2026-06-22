@@ -12,7 +12,6 @@ import Financeiro from './pages/Financeiro';
 import Fornecedores from './pages/Fornecedores';
 import CotacaoFornecedores from './pages/CotacaoFornecedores';
 import ChatBot from './pages/ChatBot';
-import WebChat from './pages/WebChat';
 import ConsultasCredito from './pages/ConsultasCredito';
 import PlaceholderPage from './pages/PlaceholderPage';
 import GestaoAcesso from './pages/GestaoAcesso';
@@ -38,7 +37,6 @@ function App() {
           <Route path="fornecedores" element={<Fornecedores />} />
           <Route path="cotacao" element={<CotacaoFornecedores />} />
           <Route path="chatbot" element={<ChatBot />} />
-          <Route path="webchat" element={<WebChat />} />
           <Route path="consultas-credito" element={<ConsultasCredito />} />
           <Route path="chamados" element={<GestãoChamados />} />
           <Route path="acesso" element={<GestaoAcesso />} />
