@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Trash2, Edit2, Phone, Mail, Package } from 'lucide-react';
+import axios from 'axios';
 
-const fornecedoresIniciais = [
-  { id: 1, nome: 'Distribuidora Alimentos Goiás', contato: 'João Silva', telefone: '(62) 3333-1111', email: 'joao@distgoias.com', categoria: 'Alimentos', status: 'Ativo' },
-  { id: 2, nome: 'Embalagens Express', contato: 'Maria Souza', telefone: '(62) 3333-2222', email: 'vendas@embexpress.com', categoria: 'Embalagens', status: 'Ativo' },
-  { id: 3, nome: 'BH Bebidas', contato: 'Pedro Costa', telefone: '(31) 3333-3333', email: 'pedidos@bhbebidas.com', categoria: 'Bebidas', status: 'Inativo' },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const categorias = ['Todos', 'Alimentos', 'Bebidas', 'Embalagens', 'Descartáveis', 'Limpeza', 'Outros'];
 
 const Fornecedores = () => {
-  const [fornecedores, setFornecedores] = useState(fornecedoresIniciais);
+  const [fornecedores, setFornecedores] = useState([]);
   const [busca, setBusca] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('Todos');
   const [showModal, setShowModal] = useState(false);
@@ -22,16 +19,50 @@ const Fornecedores = () => {
     return matchBusca && matchCat;
   });
 
-  const handleAdd = () => {
-    if (!form.nome) return alert('Informe o nome do fornecedor');
-    setFornecedores([...fornecedores, { ...form, id: Date.now(), status: 'Ativo' }]);
-    setForm({ nome: '', contato: '', telefone: '', email: '', categoria: 'Alimentos' });
-    setShowModal(false);
+  const fetchFornecedores = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(`${API_URL}/suppliers`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFornecedores(data);
+    } catch (error) {
+      console.error('Erro ao buscar fornecedores:', error);
+    }
   };
 
-  const handleDelete = (id) => {
+  useEffect(() => {
+    fetchFornecedores();
+  }, []);
+
+  const handleAdd = async () => {
+    if (!form.nome) return alert('Informe o nome do fornecedor');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/suppliers`, form, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setForm({ nome: '', contato: '', telefone: '', email: '', categoria: 'Alimentos' });
+      setShowModal(false);
+      fetchFornecedores();
+    } catch (error) {
+      console.error('Erro ao salvar fornecedor:', error);
+      alert('Erro ao salvar fornecedor');
+    }
+  };
+
+  const handleDelete = async (id) => {
     if (window.confirm('Remover este fornecedor?')) {
-      setFornecedores(fornecedores.filter(f => f.id !== id));
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`${API_URL}/suppliers/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        fetchFornecedores();
+      } catch (error) {
+        console.error('Erro ao remover fornecedor:', error);
+        alert('Erro ao remover');
+      }
     }
   };
 

@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const categoriasCor = {
   'suporte': { bg: '#eff6ff', border: '#93c5fd', badge: '#3b82f6', text: '#1d4ed8' },
@@ -22,46 +25,6 @@ const prioridadeConfig = {
   'alta': { label: 'Alta', color: '#f97316' },
   'urgente': { label: 'Urgente', color: 'var(--primary-red)' },
 };
-
-const chamadosDemo = [
-  {
-    id: 'CHM-001', titulo: 'Erro no módulo de pagamentos EFI Bank', categoria: 'tecnico',
-    status: 'em_andamento', prioridade: 'urgente', responsavel: 'Carlos Supervisor',
-    abertura: '2026-06-10 09:14', cliente: 'Sushi Lima', descricao: 'O módulo de pagamentos está retornando erro 500 ao tentar emitir boleto. Já tentei mais de 3 vezes hoje.',
-    mensagens: [
-      { autor: 'Julia Atendimento', data: '2026-06-10 09:30', texto: 'Chamado recebido! Estamos verificando a integração com o EFI Bank.' },
-      { autor: 'Carlos Supervisor', data: '2026-06-10 10:00', texto: 'Identificamos o problema: chave API expirada. Atualizando agora.' },
-    ]
-  },
-  {
-    id: 'CHM-002', titulo: 'Como cadastrar novo produto no cardápio?', categoria: 'suporte',
-    status: 'resolvido', prioridade: 'baixa', responsavel: 'Julia Atendimento',
-    abertura: '2026-06-09 14:22', cliente: 'Pizzaria Napolitana', descricao: 'Não consigo entender como adicionar uma nova categoria de produto no cardápio.',
-    mensagens: [
-      { autor: 'Julia Atendimento', data: '2026-06-09 14:50', texto: 'Olá! Acesse a página Cardápio/Produtos > clique em "+ Novo Produto" e preencha as informações. Qualquer dúvida, responda aqui!' },
-    ]
-  },
-  {
-    id: 'CHM-003', titulo: 'Nota fiscal não foi emitida após pedido', categoria: 'financeiro',
-    status: 'aberto', prioridade: 'alta', responsavel: null,
-    abertura: '2026-06-13 08:55', cliente: 'Hamburgueria do Bairro', descricao: 'O pedido #4521 foi concluído e pago, mas a nota fiscal automática não foi emitida para o cliente.',
-    mensagens: []
-  },
-  {
-    id: 'CHM-004', titulo: 'Contratar horas de desenvolvimento (DESV)', categoria: 'comercial',
-    status: 'aguardando', prioridade: 'media', responsavel: 'Carlos Supervisor',
-    abertura: '2026-06-12 16:30', cliente: 'Padaria Central', descricao: 'Gostaria de solicitar um pacote de horas de desenvolvimento para customizar o sistema conforme nossas necessidades.',
-    mensagens: [
-      { autor: 'Carlos Supervisor', data: '2026-06-12 17:00', texto: 'Obrigado pelo contato! Vou verificar a disponibilidade da equipe de desenvolvimento e te retorno com um orçamento.' },
-    ]
-  },
-  {
-    id: 'CHM-005', titulo: 'Funcionário sem acesso ao módulo de Treinamentos', categoria: 'rh',
-    status: 'aberto', prioridade: 'media', responsavel: null,
-    abertura: '2026-06-13 11:20', cliente: 'Sushi Lima', descricao: 'A funcionária Beatriz tentou acessar o módulo de Treinamentos e recebeu erro de "sem permissão". O cargo dela é Atendente.',
-    mensagens: []
-  },
-];
 
 const NovoTicketModal = ({ onClose, onSalvar }) => {
   const [form, setForm] = useState({ titulo: '', categoria: 'suporte', prioridade: 'media', descricao: '', cliente: '' });
@@ -124,13 +87,39 @@ const NovoTicketModal = ({ onClose, onSalvar }) => {
 };
 
 const GestãoChamados = () => {
-  const [chamados, setChamados] = useState(chamadosDemo);
+  const [chamados, setChamados] = useState([]);
   const [selecionado, setSelecionado] = useState(null);
   const [novaMensagem, setNovaMensagem] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos');
   const [filtroCat, setFiltroCat] = useState('todos');
   const [busca, setBusca] = useState('');
   const [modalAberto, setModalAberto] = useState(false);
+
+  const fetchTickets = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(`${API_URL}/tickets`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // The API returns an array of tickets, we need to adapt it since the frontend expected messages and priority
+      const adapted = data.map(t => ({
+        ...t,
+        id: `CHM-${t.id}`,
+        prioridade: 'media', // API doesn't have it yet, fallback
+        cliente: 'Cliente', // API doesn't have it yet, fallback
+        descricao: t.titulo,
+        mensagens: [], // API doesn't have messages yet
+        abertura: new Date(t.createdAt).toLocaleString('pt-BR')
+      }));
+      setChamados(adapted);
+    } catch (error) {
+      console.error('Erro ao buscar chamados:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   const counts = {
     aberto: chamados.filter(c => c.status === 'aberto').length,
@@ -142,7 +131,7 @@ const GestãoChamados = () => {
   const chamadosFiltrados = chamados.filter(c => {
     const matchStatus = filtroStatus === 'todos' || c.status === filtroStatus;
     const matchCat = filtroCat === 'todos' || c.categoria === filtroCat;
-    const matchBusca = c.titulo.toLowerCase().includes(busca.toLowerCase()) || c.id.includes(busca.toUpperCase());
+    const matchBusca = c.titulo.toLowerCase().includes(busca.toLowerCase()) || String(c.id).toLowerCase().includes(busca.toLowerCase());
     return matchStatus && matchCat && matchBusca;
   });
 
@@ -157,28 +146,35 @@ const GestãoChamados = () => {
     setNovaMensagem('');
   };
 
-  const mudarStatus = (novoStatus) => {
-    const atualizado = { ...selecionado, status: novoStatus };
-    setChamados(prev => prev.map(c => c.id === selecionado.id ? atualizado : c));
-    setSelecionado(atualizado);
+  const mudarStatus = async (novoStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const realId = selecionado.id.split('-')[1]; // CHM-123 -> 123
+      await axios.put(`${API_URL}/tickets/${realId}`, { status: novoStatus }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchTickets();
+      setSelecionado(prev => ({ ...prev, status: novoStatus }));
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+    }
   };
 
-  const abrirNovoTicket = (form) => {
-    const novo = {
-      id: `CHM-00${chamados.length + 1}`,
-      titulo: form.titulo || 'Novo chamado',
-      categoria: form.categoria,
-      status: 'aberto',
-      prioridade: form.prioridade,
-      responsavel: null,
-      abertura: new Date().toLocaleString('pt-BR'),
-      cliente: form.cliente || 'Não informado',
-      descricao: form.descricao,
-      mensagens: [],
-    };
-    setChamados(prev => [novo, ...prev]);
-    setModalAberto(false);
-    setSelecionado(novo);
+  const abrirNovoTicket = async (form) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/tickets`, {
+        titulo: form.titulo,
+        categoria: form.categoria,
+        autor: 'Usuário'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setModalAberto(false);
+      fetchTickets();
+    } catch (error) {
+      console.error('Erro ao abrir chamado:', error);
+    }
   };
 
   return (

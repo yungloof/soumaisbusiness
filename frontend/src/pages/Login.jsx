@@ -4,8 +4,8 @@ import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('master@soublu.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -135,25 +135,7 @@ const Login = () => {
             <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? 'Entrando...' : 'Entrar'}</button>
           </form>
 
-          <div className="demo-access">
-            <div className="demo-access-title">ACESSOS DE DEMONSTRAÇÃO</div>
-            <div className="demo-row">
-              <span className="demo-label">Master</span>
-              <span className="demo-value">master@soublu.com</span>
-            </div>
-            <div className="demo-row">
-              <span className="demo-label">Supervisor</span>
-              <span className="demo-value">supervisor@soublu.com</span>
-            </div>
-            <div className="demo-row">
-              <span className="demo-label">Cliente</span>
-              <span className="demo-value">joao@pizzaria.com</span>
-            </div>
-            <div className="demo-row" style={{ marginTop: '0.5rem', borderTop: '1px solid #e5e7eb', paddingTop: '0.5rem' }}>
-              <span className="demo-label text-muted">Senha (todos)</span>
-              <span className="demo-value">123456</span>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>

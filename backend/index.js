@@ -47,6 +47,18 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Mount API Routes
+const supplierRoutes = require('./routes/supplierRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
+const financeRoutes = require('./routes/financeRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+app.use('/api/suppliers', authenticateToken, supplierRoutes);
+app.use('/api/tickets', authenticateToken, ticketRoutes);
+app.use('/api/finance', authenticateToken, financeRoutes);
+app.use('/api/users', authenticateToken, userRoutes);
+
+
 // Auth Route
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;

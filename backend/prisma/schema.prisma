@@ -12,7 +12,10 @@ model Company {
   cnpj            String? @unique
   razao_social    String?
   modules_allowed String?
-  users           User[]
+  users                User[]
+  suppliers            Supplier[]
+  tickets              Ticket[]
+  financial_transactions FinancialTransaction[]
 
   @@map("companies")
 }
@@ -26,4 +29,48 @@ model User {
   company    Company? @relation(fields: [company_id], references: [id])
 
   @@map("users")
+}
+
+model Supplier {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  contato   String?
+  telefone  String?
+  email     String?
+  categoria String?
+  status    String   @default("Ativo")
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("suppliers")
+}
+
+model Ticket {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  categoria String
+  status    String   @default("aberto")
+  autor     String?
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tickets")
+}
+
+model FinancialTransaction {
+  id          Int      @id @default(autoincrement())
+  descricao   String
+  valor       Float
+  tipo        String   // 'PAGAR' ou 'RECEBER'
+  vencimento  DateTime
+  status      String   @default("Pendente")
+  fornecedor  String?
+  companyId   Int?
+  company     Company? @relation(fields: [companyId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@map("financial_transactions")
 }

@@ -16,6 +16,8 @@ import ConsultasCredito from './pages/ConsultasCredito';
 import PlaceholderPage from './pages/PlaceholderPage';
 import GestaoAcesso from './pages/GestaoAcesso';
 import GestãoChamados from './pages/GestãoChamados';
+import Supervisores from './pages/Supervisores';
+import Clientes from './pages/Clientes';
 
 function App() {
   return (
@@ -25,8 +27,8 @@ function App() {
         
         <Route path="/master" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} />
-          <Route path="supervisores" element={<PlaceholderPage title="Supervisores" subtitle="Gestão de todos os supervisores da rede" />} />
-          <Route path="clientes" element={<PlaceholderPage title="Clientes" subtitle="Gestão de todos os clientes mentorados" />} />
+          <Route path="supervisores" element={<Supervisores />} />
+          <Route path="clientes" element={<Clientes />} />
           <Route path="funcionarios/novo" element={<CadastroFuncionario />} />
           <Route path="clientes/novo" element={<CadastroCliente />} />
           <Route path="cardapio" element={<GestaoCardapio />} />
