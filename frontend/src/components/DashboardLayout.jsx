@@ -17,7 +17,7 @@ const navMaster = [
     ]
   },
   {
-    label: 'ADMINISTRAÇÃO SOU+BUSINESS',
+    label: 'ADMINISTRAÇÃO',
     items: [
       { id: 'supervisores', path: '/master/supervisores', icon: Users, label: 'Gestão de Supervisores', module: 'all' },
       { id: 'funcionarios-novo', path: '/master/funcionarios/novo', icon: UserPlus, label: 'Novo Colaborador Interno', module: 'all' },
