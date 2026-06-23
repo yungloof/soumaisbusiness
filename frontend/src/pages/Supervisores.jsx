@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Shield, User } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -26,7 +27,7 @@ const Supervisores = () => {
   }, []);
 
   const handleAdd = async () => {
-    if (!form.email || !form.password) return alert('Preencha email e senha');
+    if (!form.email || !form.password) return toast.error('Preencha email e senha');
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${API_URL}/users`, {
@@ -39,9 +40,10 @@ const Supervisores = () => {
       setForm({ email: '', password: '' });
       setShowModal(false);
       fetchSupervisores();
+      toast.success('Supervisor adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar supervisor:', error);
-      alert('Erro ao salvar supervisor. Verifique se o email já existe.');
+      toast.error('Erro ao salvar supervisor. Verifique se o email já existe.');
     }
   };
 
@@ -53,9 +55,10 @@ const Supervisores = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchSupervisores();
+        toast.success('Supervisor removido');
       } catch (error) {
         console.error('Erro ao remover supervisor:', error);
-        alert('Erro ao remover');
+        toast.error('Erro ao remover');
       }
     }
   };

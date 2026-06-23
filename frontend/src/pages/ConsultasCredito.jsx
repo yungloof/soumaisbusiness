@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { Search, CreditCard, Shield, FileCheck, AlertTriangle, User, Car, Briefcase, Loader2 } from 'lucide-react';
 
 const consultas = [
@@ -59,7 +60,7 @@ const ConsultasCredito = () => {
   const [historico, setHistorico] = useState([]);
 
   const handleConsultar = async (item) => {
-    if (!inputVal.trim()) return alert('Digite o documento para consultar');
+    if (!inputVal.trim()) return toast.error('Digite o documento para consultar');
 
     const token = localStorage.getItem('token');
     const cleanDoc = inputVal.replace(/\D/g, '');

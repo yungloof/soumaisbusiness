@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -38,12 +39,12 @@ const Financeiro = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('Pagamento solicitado/registrado com sucesso!');
+      toast.success('Pagamento solicitado/registrado com sucesso!');
       setFormPagar({ fornecedor: '', descricao: 'Outros Pagamentos', valor: '', vencimento: '' });
       fetchTransactions();
       setTab('extrato');
     } catch (error) {
-      alert('Erro ao registrar pagamento.');
+      toast.error('Erro ao registrar pagamento.');
     }
   };
 
@@ -59,12 +60,12 @@ const Financeiro = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('Cobrança gerada com sucesso via Mercado Pago (Sandbox)!');
+      toast.success('Cobrança gerada com sucesso via Mercado Pago (Sandbox)!');
       setFormReceber({ descricao: 'Sistema (SaaS)', valor: '', vencimento: '' });
       fetchTransactions();
       setTab('extrato');
     } catch (error) {
-      alert('Erro ao gerar cobrança.');
+      toast.error('Erro ao gerar cobrança.');
     }
   };
 
@@ -74,10 +75,10 @@ const Financeiro = () => {
       const response = await axios.put(`${API_URL}/finance/${id}/pay`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert(response.data.message);
+      toast.success(response.data.message);
       fetchTransactions();
     } catch (error) {
-      alert('Erro ao processar o pagamento no Mercado Pago.');
+      toast.error('Erro ao processar o pagamento no Mercado Pago.');
     }
   };
 

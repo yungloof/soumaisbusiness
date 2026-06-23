@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 const CadastroCliente = () => {
   const [formData, setFormData] = useState({
@@ -24,7 +25,7 @@ const CadastroCliente = () => {
   const [loadingPgfn, setLoadingPgfn] = useState(false);
 
   const fetchCnpj = async () => {
-    if (!formData.cnpj) return alert('Digite um CNPJ válido');
+    if (!formData.cnpj) return toast.error('Digite um CNPJ válido');
     setLoadingCnpj(true);
     setCnpjData(null);
     try {
@@ -42,23 +43,25 @@ const CadastroCliente = () => {
         throw new Error(`Erro ao ler resposta do servidor (Status ${response.status})`);
       }
 
-      if (response.ok) {
-        setRazaoSocial(data.razao_social || data.nomeEmpresarial || data.nomeFantasia || data.nome || 'Empresa Desconhecida');
-        setCnpjData(data); // Save the entire response object to show details
-        alert('CNPJ Encontrado com sucesso!');
+      if (data.status === 'success') {
+        setCnpjData(data.data);
+        if (data.data.razao_social) {
+          setRazaoSocial(data.data.razao_social);
+        }
+        toast.success('CNPJ Encontrado com sucesso!');
       } else {
-        const errorMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : data.error;
-        alert(errorMsg || 'Erro ao buscar CNPJ. Verifique se há créditos.');
+        const errorMsg = data.message || data.error;
+        toast.error(errorMsg || 'Erro ao buscar CNPJ. Verifique se há créditos.');
       }
     } catch (error) {
-      alert(`Erro ao buscar CNPJ: ${error.message}. Você fez login novamente?`);
+      toast.error(`Erro ao buscar CNPJ: ${error.message}. Você fez login novamente?`);
     } finally {
       setLoadingCnpj(false);
     }
   };
 
   const fetchScore = async () => {
-    if (!formData.cnpj) return alert('Digite o CNPJ primeiro');
+    if (!formData.cnpj) return toast.error('Digite o CNPJ primeiro');
     setLoadingScore(true);
     try {
       const token = localStorage.getItem('token');
@@ -90,7 +93,7 @@ const CadastroCliente = () => {
   };
 
   const fetchPgfn = async () => {
-    if (!formData.cnpj) return alert('Digite o CNPJ primeiro');
+    if (!formData.cnpj) return toast.error('Digite o CNPJ primeiro');
     setLoadingPgfn(true);
     try {
       const token = localStorage.getItem('token');
@@ -125,7 +128,7 @@ const CadastroCliente = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Cliente cadastrado com sucesso e permissões salvas!');
+    toast.success('Cliente cadastrado com sucesso e permissões salvas!');
   };
 
   return (

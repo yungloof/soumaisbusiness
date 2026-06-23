@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Trash2, Edit2, Phone, Mail, Package } from 'lucide-react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -36,7 +37,7 @@ const Fornecedores = () => {
   }, []);
 
   const handleAdd = async () => {
-    if (!form.nome) return alert('Informe o nome do fornecedor');
+    if (!form.nome) return toast.error('Informe o nome do fornecedor');
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${API_URL}/suppliers`, form, {
@@ -45,9 +46,10 @@ const Fornecedores = () => {
       setForm({ nome: '', contato: '', telefone: '', email: '', categoria: 'Alimentos' });
       setShowModal(false);
       fetchFornecedores();
+      toast.success('Fornecedor adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar fornecedor:', error);
-      alert('Erro ao salvar fornecedor');
+      toast.error('Erro ao salvar fornecedor');
     }
   };
 
@@ -59,9 +61,10 @@ const Fornecedores = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchFornecedores();
+        toast.success('Fornecedor removido com sucesso!');
       } catch (error) {
         console.error('Erro ao remover fornecedor:', error);
-        alert('Erro ao remover');
+        toast.error('Erro ao remover fornecedor');
       }
     }
   };

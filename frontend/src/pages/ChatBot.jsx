@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Send, User, MessageSquare, Loader2, Plus, QrCode, LogOut } from 'lucide-react';
 import { io } from 'socket.io-client';
+import { toast } from 'react-hot-toast';
 
 const ChatBot = () => {
   // Wa Connection States
@@ -235,7 +236,7 @@ const ChatBot = () => {
       });
       const data = await res.json();
       if (!data.success) {
-        alert('Erro ao enviar mensagem');
+      toast.error('Erro ao enviar mensagem');
       }
     } catch (err) {
       console.error('Error sending message:', err);

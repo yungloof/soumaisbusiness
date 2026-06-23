@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Building, Mail } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -26,7 +27,7 @@ const Clientes = () => {
   }, []);
 
   const handleAdd = async () => {
-    if (!form.companyName || !form.email || !form.password) return alert('Preencha todos os campos');
+    if (!form.companyName || !form.email || !form.password) return toast.error('Preencha todos os campos');
     try {
       const token = localStorage.getItem('token');
       await axios.post(`${API_URL}/users`, {
@@ -41,9 +42,10 @@ const Clientes = () => {
       setForm({ companyName: '', email: '', password: '' });
       setShowModal(false);
       fetchClientes();
+      toast.success('Cliente adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar cliente:', error);
-      alert('Erro ao salvar cliente. Verifique se o email já existe.');
+      toast.error('Erro ao salvar cliente. Verifique se o email já existe.');
     }
   };
 
@@ -55,9 +57,10 @@ const Clientes = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchClientes();
+        toast.success('Cliente removido');
       } catch (error) {
         console.error('Erro ao remover cliente:', error);
-        alert('Erro ao remover');
+        toast.error('Erro ao remover');
       }
     }
   };

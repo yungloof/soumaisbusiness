@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { ClipboardList, Plus, Send, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 const fornecedoresList = [];
@@ -18,7 +19,7 @@ const CotacaoFornecedores = () => {
   const [form, setForm] = useState({ item: '', quantidade: '', unidade: 'un', status: 'Aguardando', fornecedores: [] });
 
   const handleAdd = () => {
-    if (!form.item || !form.quantidade) return alert('Preencha o item e a quantidade');
+    if (!form.item || !form.quantidade) return toast.error('Preencha o item e a quantidade');
     setCotacoes([...cotacoes, { ...form, id: Date.now(), fornecedores: [] }]);
     setForm({ item: '', quantidade: '', unidade: 'un', status: 'Aguardando', fornecedores: [] });
     setShowModal(false);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 const PedidosManuais = () => {
   const [pedido, setPedido] = useState({
@@ -12,17 +13,17 @@ const PedidosManuais = () => {
   };
 
   const handleGerarCobranca = () => {
-    alert('Cobrança gerada e enviada via WhatsApp automático! Status: EM PREPARO');
+    toast.success('Cobrança gerada e enviada via WhatsApp automático! Status: EM PREPARO');
     setPedido({ ...pedido, status: 'Em Preparo' });
   };
 
   const handleGerarPedido = () => {
-    alert('Pedido despachado! Status: SAIU PARA ENTREGA');
+    toast.success('Pedido despachado! Status: SAIU PARA ENTREGA');
     setPedido({ ...pedido, status: 'Saiu para Entrega' });
   };
 
   const handleEmitirCupom = () => {
-    alert('Cupom Fiscal emitido com sucesso! Status: ENTREGUE');
+    toast.success('Cupom Fiscal emitido com sucesso! Status: ENTREGUE');
     setPedido({ ...pedido, status: 'Entregue' });
   };
 

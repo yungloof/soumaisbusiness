@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { UserPlus, Save, Building, Shield, FileText } from 'lucide-react';
 
 const CadastroFuncionario = () => {
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ const CadastroFuncionario = () => {
   };
 
   const fetchCpf = async () => {
-    if (!formData.cpf) return alert('Digite o CPF primeiro');
+    if (!formData.cpf) return toast.error('Digite o CPF primeiro');
     setLoadingCpf(true);
     setCpfData(null);
     try {
@@ -39,15 +41,15 @@ const CadastroFuncionario = () => {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
-      if (response.ok && !data.error) {
-        setCpfData(data);
-        alert('CPF Encontrado!');
+      if (data.status === 'success') {
+        setCpfData(data.data);
+        toast.success('CPF Encontrado!');
       } else {
-        const errorMsg = data.error?.message || data.error || 'Erro ao buscar CPF';
-        alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+        const errorMsg = data.message || data.error || 'Erro ao buscar CPF';
+        toast.error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
       }
     } catch (error) {
-      alert(`Erro: ${error.message}`);
+      toast.error(`Erro: ${error.message}`);
     } finally {
       setLoadingCpf(false);
     }
@@ -55,7 +57,7 @@ const CadastroFuncionario = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Funcionário cadastrado com sucesso!');
+    toast.success('Funcionário cadastrado com sucesso!');
   };
 
   return (

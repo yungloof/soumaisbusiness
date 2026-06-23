@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { ShoppingBag, ExternalLink, Tag, Briefcase, Scale, Building2, Palette, TrendingUp, Landmark, Shield, BookOpen } from 'lucide-react';
 
 const categorias = [
@@ -78,6 +80,40 @@ const categorias = [
 const Marketplace = () => {
   const [categoriaAtiva, setCategoriaAtiva] = useState('todos');
   const [busca, setBusca] = useState('');
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+  const handleContratar = async (servico) => {
+    try {
+      const token = localStorage.getItem('token');
+      // Parse valor for numeric representation
+      let parsedValor = 0;
+      if (servico.valor !== 'A DEFINIR' && servico.valor !== 'Grátis') {
+        parsedValor = parseFloat(servico.valor.replace(/[^0-9,]/g, '').replace(',', '.'));
+      }
+      
+      const payload = {
+        descricao: `Serviço Marketplace: ${servico.nome}`,
+        valor: parsedValor > 0 ? parsedValor : 100, // default if 'a definir' just for simulation
+        tipo: 'PAGAR',
+        vencimento: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 days from now
+        fornecedor: 'SOU+BUSINESS Serviços',
+        status: 'Pendente'
+      };
+
+      await axios.post(`${API_URL}/finance`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(
+        <div>
+          <b>Serviço Solicitado!</b><br/>
+          Uma cobrança foi gerada no seu <br/><b>Painel Financeiro / BPO</b>.
+        </div>
+      );
+    } catch (error) {
+      toast.error('Erro ao processar solicitação. Tente novamente.');
+    }
+  };
 
   const todasCategorias = [{ id: 'todos', nome: 'Todos', icon: ShoppingBag, cor: '#6b7280', bg: '#f9fafb' }, ...categorias];
 
@@ -176,7 +212,7 @@ const Marketplace = () => {
                       <div style={{ fontSize: '1.25rem', fontWeight: 800, color: cat.cor }}>{svc.valor}</div>
                     </div>
                     <button
-                      onClick={() => alert(`Solicitação de "${svc.nome}" enviada para a central! Entraremos em contato em breve.`)}
+                      onClick={() => handleContratar(svc)}
                       style={{ width: '100%', padding: '0.65rem', background: cat.cor, color: 'white', borderRadius: 8, fontWeight: 700, cursor: 'pointer', border: 'none', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                     >
                       {svc.acao} <ExternalLink size={14} />

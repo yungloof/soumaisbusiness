@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
@@ -22,6 +23,7 @@ import Clientes from './pages/Clientes';
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontWeight: 600, fontSize: '0.9rem' } }} />
       <Routes>
         <Route path="/login" element={<Login />} />
         
