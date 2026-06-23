@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 
 const GestaoCardapio = () => {
-  const [produtos, setProdutos] = useState([
-    { id: 1, nome: 'Hambúrguer Artesanal', descricao: 'Pão brioche, carne 180g, queijo prato', valor: 'R$ 35,00', imagem: '🍔' }
-  ]);
+  const [produtos, setProdutos] = useState([]);
 
   const [novoProduto, setNovoProduto] = useState({ nome: '', descricao: '', valor: '' });
 

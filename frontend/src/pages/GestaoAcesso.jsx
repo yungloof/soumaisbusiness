@@ -24,12 +24,7 @@ const PERFIS_PRESET = {
   'Acesso Total': MODULOS_SISTEMA.map(m => m.id),
 };
 
-const funcionariosDemo = [
-  { id: 1, nome: 'Carlos Supervisor', cargo: 'Supervisor', departamento: 'Comercial', email: 'carlos@soublu.com', permissoes: ['dashboard', 'funcionarios', 'clientes', 'chamados'], status: 'ativo' },
-  { id: 2, nome: 'Ana Vendas', cargo: 'Vendedora', departamento: 'Comercial', email: 'ana@soublu.com', permissoes: ['dashboard', 'clientes', 'pedidos'], status: 'ativo' },
-  { id: 3, nome: 'Marcos Financeiro', cargo: 'Analista Financeiro', departamento: 'Financeiro', email: 'marcos@soublu.com', permissoes: ['dashboard', 'financeiro', 'fornecedores'], status: 'ativo' },
-  { id: 4, nome: 'Julia Atendimento', cargo: 'Atendente', departamento: 'Suporte', email: 'julia@soublu.com', permissoes: ['dashboard', 'chamados', 'chatbot', 'treinamentos'], status: 'inativo' },
-];
+const funcionariosDemo = [];
 
 const GestaoAcesso = () => {
   const [funcionarios, setFuncionarios] = useState(funcionariosDemo);

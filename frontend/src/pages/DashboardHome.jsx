@@ -1,81 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 import './DashboardMaster.css';
 
-const chartData = [
-  { name: 'Carlos Supervisor', value: 351779 }
-];
-
-const supervisores = [
-  {
-    name: 'Carlos Supervisor',
-    email: 'supervisor@soublu.com',
-    clients: 3,
-    faturamento: 'R$ 351.779',
-    crescimento: '+58.8%'
-  }
-];
-
-// ─── Aprovações Pendentes (dados demo baseados na planilha) ────────────────────
-const aprovacoesPendentes = [
-  {
-    id: 'APR-001',
-    tipo: 'pagamento',
-    titulo: 'Pagamento a Fornecedor — Aluguel',
-    detalhe: 'Pizzaria Napolitana · R$ 3.500,00 · Chave PIX: *****2309',
-    solicitante: 'Marcos Financeiro',
-    data: '2026-06-13 08:30',
-    icon: '💸',
-    cor: '#f59e0b',
-    bgCor: '#fef3c7',
-  },
-  {
-    id: 'APR-002',
-    tipo: 'cadastro_cliente',
-    titulo: 'Aprovação de Cadastro — Novo Parceiro PJ',
-    detalhe: 'Hamburgueria Central LTDA · CNPJ: 12.345.678/0001-99 · Compliance: Pendente',
-    solicitante: 'Ana Vendas',
-    data: '2026-06-13 09:15',
-    icon: '🏢',
-    cor: '#3b82f6',
-    bgCor: '#eff6ff',
-  },
-  {
-    id: 'APR-003',
-    tipo: 'pagamento',
-    titulo: 'Solicitação BPO — Energia + Água',
-    detalhe: 'Sushi Lima · R$ 1.200,00 · Vencimento: 15/06/2026',
-    solicitante: 'Julia Atendimento',
-    data: '2026-06-12 17:45',
-    icon: '💡',
-    cor: '#f59e0b',
-    bgCor: '#fef3c7',
-  },
-  {
-    id: 'APR-004',
-    tipo: 'desbloqueio',
-    titulo: 'Solicitação de Desbloqueio de Conta',
-    detalhe: 'Vendedor: Pedro Sales · Meta não atingida em 13/06/2026',
-    solicitante: 'Carlos Supervisor',
-    data: '2026-06-13 10:00',
-    icon: '🔓',
-    cor: 'var(--primary-red)',
-    bgCor: '#fee2e2',
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const DashboardHome = () => {
-  const [activeTab, setActiveTab] = useState('Supervisores');
-  const [aprovacoes, setAprovacoes] = useState(aprovacoesPendentes);
+  const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+  const [aprovacoes, setAprovacoes] = useState([]);
   const [decidindoId, setDecididndoId] = useState(null);
+  const [activeTab, setActiveTab] = useState('Supervisores');
+  const [supervisores, setSupervisores] = useState([]);
 
-  const decidirAprovacao = (id, acao) => {
-    setDecididndoId(id);
-    setTimeout(() => {
-      setAprovacoes(prev => prev.filter(a => a.id !== id));
-      setDecididndoId(null);
-    }, 600);
+  const fetchDashboard = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      const [dashRes, supRes] = await Promise.all([
+        axios.get(`${API_URL}/dashboard/stats`, { headers }),
+        axios.get(`${API_URL}/users?role=SUPERVISOR`, { headers })
+      ]);
+      setStats(dashRes.data);
+      setAprovacoes(dashRes.data.aprovacoes || []);
+      setSupervisores(supRes.data);
+    } catch (error) {
+      console.error('Erro ao buscar dashboard:', error);
+    }
   };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const decidirAprovacao = async (id, acao) => {
+    setDecididndoId(id);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/dashboard/aprovacao/${id}`, { acao }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTimeout(() => {
+        setAprovacoes(prev => prev.filter(a => a.id !== id));
+        setDecididndoId(null);
+      }, 400);
+    } catch (error) {
+      console.error('Erro ao processar aprovação:', error);
+      setDecididndoId(null);
+    }
+  };
+
+  const faturamento = stats?.faturamentoRecebido || 0;
+  const chartData = supervisores.length > 0
+    ? supervisores.map(s => ({ name: s.email.split('@')[0], value: Math.round(faturamento / supervisores.length) }))
+    : [{ name: 'Nenhum supervisor', value: 0 }];
 
   return (
     <>
@@ -91,7 +70,7 @@ const DashboardHome = () => {
               {aprovacoes.length} aprovação{aprovacoes.length > 1 ? 'ões' : ''} pendente{aprovacoes.length > 1 ? 's' : ''}
             </span>
           )}
-          <button className="btn-primary" style={{ width: 'auto', padding: '0.5rem 1rem' }}>+ Novo supervisor</button>
+          <button className="btn-primary" style={{ width: 'auto', padding: '0.5rem 1rem' }} onClick={() => navigate('/master/supervisores')}>+ Novo supervisor</button>
         </div>
       </header>
 
@@ -103,27 +82,27 @@ const DashboardHome = () => {
 
         <div className="metrics-grid">
           <div className="metric-card">
-            <div className="metric-label red">Faturamento da rede</div>
-            <div className="metric-value">R$ 351.779</div>
-            <div className="metric-subtext">5 meses - 3 restaurantes</div>
+            <div className="metric-label red">Faturamento recebido</div>
+            <div className="metric-value">R$ {faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div className="metric-subtext">Cobranças pagas</div>
           </div>
           
           <div className="metric-card">
             <div className="metric-label orange">Supervisores ativos</div>
-            <div className="metric-value">1</div>
+            <div className="metric-value">{stats?.totalSupervisors || 0}</div>
             <div className="metric-subtext">Mentores em atividade</div>
           </div>
 
           <div className="metric-card">
-            <div className="metric-label green">Crescimento médio</div>
-            <div className="metric-value">+58.8%</div>
-            <div className="metric-subtext"><span className="metric-highlight">Mês 1 → Mês 5</span></div>
+            <div className="metric-label green">Parceiros (Empresas)</div>
+            <div className="metric-value">{stats?.totalCompanies || 0}</div>
+            <div className="metric-subtext">Empresas ativas na rede</div>
           </div>
 
           <div className="metric-card">
-            <div className="metric-label blue">Top 1 da rede</div>
-            <div className="metric-value" style={{ fontSize: '1.5rem' }}>Sushi Lima</div>
-            <div className="metric-subtext">R$ 172.793</div>
+            <div className="metric-label blue">Chamados abertos</div>
+            <div className="metric-value">{stats?.pendingTickets || 0}</div>
+            <div className="metric-subtext">Suporte em andamento</div>
           </div>
         </div>
 
@@ -168,7 +147,7 @@ const DashboardHome = () => {
                     <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.2rem' }}>{apr.titulo}</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{apr.detalhe}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-light)', marginTop: '0.2rem' }}>
-                      Solicitado por <strong>{apr.solicitante}</strong> · {apr.data}
+                      Registrado em {apr.data}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
@@ -211,7 +190,7 @@ const DashboardHome = () => {
         )}
 
         <div className="chart-card">
-          <h2 className="chart-title">Faturamento por supervisor (5 meses)</h2>
+          <h2 className="chart-title">Faturamento por supervisor</h2>
           <div style={{ height: '300px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -248,27 +227,33 @@ const DashboardHome = () => {
                   <tr>
                     <th>SUPERVISOR</th>
                     <th>E-MAIL</th>
-                    <th>CLIENTES</th>
-                    <th>FATURAMENTO (5M)</th>
-                    <th>CRESCIMENTO MÉDIO</th>
+                    <th>NÍVEL</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {supervisores.map((sup, idx) => (
-                    <tr key={idx} className="table-row">
-                      <td style={{ fontWeight: 600 }}>{sup.name}</td>
+                  {supervisores.length > 0 ? supervisores.map((sup) => (
+                    <tr key={sup.id} className="table-row">
+                      <td style={{ fontWeight: 600 }}>{sup.email.split('@')[0]}</td>
                       <td style={{ color: '#6b7280' }}>{sup.email}</td>
-                      <td>{sup.clients}</td>
-                      <td style={{ fontWeight: 600 }}>{sup.faturamento}</td>
-                      <td className="text-success">{sup.crescimento}</td>
+                      <td>
+                        <span style={{ background: '#fefce8', color: '#a16207', padding: '2px 10px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600 }}>
+                          SUPERVISOR
+                        </span>
+                      </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                        Nenhum supervisor cadastrado. <span style={{ color: 'var(--primary-red)', cursor: 'pointer', fontWeight: 600 }} onClick={() => navigate('/master/supervisores')}>Adicionar →</span>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             )}
             {activeTab === 'Ranking' && (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                Nenhum dado de ranking disponível no momento.
+                O ranking será preenchido conforme dados de faturamento forem registrados.
               </div>
             )}
           </div>

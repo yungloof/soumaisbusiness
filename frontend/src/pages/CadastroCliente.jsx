@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const CadastroCliente = () => {
   const [formData, setFormData] = useState({
     cnpj: '',
-    vendedor: 'Carlos Supervisor', // default/mock
+    vendedor: '', // Será preenchido pelo usuário
     email: '',
     senha: '',
     simplesNacional: 'SIM',

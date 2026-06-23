@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ClipboardList, Plus, Send, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
-const fornecedoresList = ['Distribuidora Alimentos Goiás', 'Embalagens Express', 'BH Bebidas'];
+const fornecedoresList = [];
 
 const statusConfig = {
   'Aguardando': { color: '#f59e0b', bg: '#fef3c7', icon: Clock },
@@ -9,19 +9,7 @@ const statusConfig = {
   'Urgente': { color: '#ea1d2c', bg: '#fee2e2', icon: AlertCircle },
 };
 
-const cotacoesIniciais = [
-  {
-    id: 1, item: 'Caixas de Pizza 40cm', quantidade: 500, unidade: 'un', status: 'Respondido',
-    fornecedores: [
-      { nome: 'Embalagens Express', valor: 0.85, prazo: '2 dias', obs: 'Disponível em estoque' },
-      { nome: 'Distribuidora Alimentos Goiás', valor: 0.92, prazo: '3 dias', obs: '' },
-    ]
-  },
-  {
-    id: 2, item: 'Refrigerante 2L', quantidade: 100, unidade: 'cx', status: 'Aguardando',
-    fornecedores: []
-  },
-];
+const cotacoesIniciais = [];
 
 const CotacaoFornecedores = () => {
   const [cotacoes, setCotacoes] = useState(cotacoesIniciais);

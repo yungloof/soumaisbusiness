@@ -56,11 +56,7 @@ const ConsultasCredito = () => {
   const [inputVal, setInputVal] = useState('');
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState(null);
-  const [historico, setHistorico] = useState([
-    { nome: 'Cadastro Empresarial — Completo', documento: '44.702.171/0001-38', preco: 3.00, data: '13/06/2026 17:42', status: 'Sucesso' },
-    { nome: 'Análise de Risco Positivo — PJ', documento: '44.702.171/0001-38', preco: 40.00, data: '13/06/2026 18:15', status: 'Sucesso' },
-    { nome: 'Devedores PGFN', documento: '44.702.171/0001-38', preco: 1.25, data: '13/06/2026 18:15', status: 'Sucesso' },
-  ]);
+  const [historico, setHistorico] = useState([]);
 
   const handleConsultar = async (item) => {
     if (!inputVal.trim()) return alert('Digite o documento para consultar');

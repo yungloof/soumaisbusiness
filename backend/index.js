@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3001;
 // Seed default master user
 async function seedMaster() {
   try {
-    const masterEmail = 'master@soublu.com';
+    const masterEmail = 'master@soumaisbusiness.com';
     const existingUser = await prisma.user.findUnique({ where: { email: masterEmail } });
     if (!existingUser) {
       const hashedPw = await bcrypt.hash('123456', 10);
@@ -52,11 +52,13 @@ const supplierRoutes = require('./routes/supplierRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const financeRoutes = require('./routes/financeRoutes');
 const userRoutes = require('./routes/userRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 app.use('/api/suppliers', authenticateToken, supplierRoutes);
 app.use('/api/tickets', authenticateToken, ticketRoutes);
 app.use('/api/finance', authenticateToken, financeRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
+app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 
 
 // Auth Route
