@@ -32,6 +32,7 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json(transaction);
   } catch (error) {
+    console.error('Error creating transaction:', error);
     res.status(500).json({ error: 'Erro ao criar transação' });
   }
 });
