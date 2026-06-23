@@ -272,3 +272,95 @@ tr:last-child td {
 }
 
 .text-success { color: var(--success-color); font-weight: 600; }
+
+/* Responsive Mobile Layout */
+.mobile-header {
+  display: none;
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem;
+  align-items: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.mobile-menu-btn, .mobile-close-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-close-btn {
+  display: none;
+}
+
+.mobile-header-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 998;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Hidden by default */
+    height: 100vh;
+    z-index: 999;
+    transition: left 0.3s ease;
+    width: 280px;
+  }
+  
+  .sidebar.open {
+    left: 0;
+  }
+  
+  .sidebar-overlay {
+    display: block; /* Shows when mobileMenuOpen is true */
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .mobile-close-btn.d-lg-none {
+    display: block;
+    color: var(--text-main);
+  }
+
+  .topbar {
+    display: none; /* Hide topbar on mobile if we use mobile-header */
+  }
+  
+  .content-area {
+    padding: 1rem;
+  }
+
+  /* Fix grids for widgets on mobile */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .marketplace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Make tables responsive */
+  .table-container {
+    overflow-x: auto;
+  }
+}

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
-  LayoutDashboard, Users, Building2, UserPlus, FilePlus, MenuSquare,
+  LayoutDashboard, Users, Building2, UserPlus, FilePlus, MenuSquare, X,
   Receipt, Store, GraduationCap, DollarSign, LogOut, Package,
   ClipboardList, MessageSquare, CreditCard, ChevronDown, ChevronRight,
   ShieldCheck, LifeBuoy
@@ -67,9 +67,14 @@ const navParceiro = [
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [simularParceiro, setSimularParceiro] = useState(false);
   
   const user = JSON.parse(localStorage.getItem('user')) || { role: 'MASTER', modules: ['all'] };
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -79,17 +84,20 @@ const DashboardLayout = () => {
 
   const isVisible = (module) => user.role === 'MASTER' || user.modules?.includes('all') || user.modules?.includes(module);
 
-  // Seleciona o menu baseado no estado de simulação ou no papel do usuário
   const isCliente = user.role === 'CLIENTE';
   const activeNavGroups = (simularParceiro || isCliente) ? navParceiro : navMaster;
 
   return (
     <div className="dashboard-layout">
-      {/* Sidebar */}
-      <aside className="sidebar" style={{ overflowY: 'auto' }}>
+      {mobileMenuOpen && <div className="sidebar-overlay" onClick={() => setMobileMenuOpen(false)}></div>}
+
+      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`} style={{ overflowY: 'auto' }}>
         <div className="sidebar-header">
-          <div className="logo-container" style={{ padding: '0.5rem 0' }}>
+          <div className="logo-container" style={{ padding: '0.5rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <img src="/logo-mono.png" alt="SOU+BUSINESS Logo" style={{ height: '44px', objectFit: 'contain' }} />
+            <button className="mobile-close-btn d-lg-none" onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+              <X size={24} />
+            </button>
           </div>
           <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ backgroundColor: simularParceiro ? '#f59e0b' : '#1a1a1a', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
@@ -98,7 +106,6 @@ const DashboardLayout = () => {
           </div>
         </div>
 
-        {/* Toggle para Teste Rápido (Apenas se for MASTER) */}
         {user.role === 'MASTER' && (
           <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: '#fafafa' }}>
             <label 
@@ -157,8 +164,14 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="main-content">
+        <div className="mobile-header">
+          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)}>
+            <MenuSquare size={24} />
+          </button>
+          <span className="mobile-header-title">{user.role === 'MASTER' ? 'Painel Master' : 'Painel Parceiro'}</span>
+        </div>
+
         <Outlet />
       </main>
     </div>
