@@ -46,7 +46,7 @@ const Login = () => {
         {/* Left Side - Presentation */}
         <div className="login-left">
           <div className="login-logo" style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-            <img src="/logo-color.png" alt="SOU+BUSINESS Logo" style={{ height: '48px', objectFit: 'contain' }} />
+            <img src="/logo-color.png" alt="SOU+BUSINESS Logo" style={{ height: '72px', objectFit: 'contain' }} />
           </div>
           
           <div className="badge-mentoria">MENTORIA IFOOD</div>

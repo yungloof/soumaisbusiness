@@ -89,7 +89,7 @@ const DashboardLayout = () => {
       <aside className="sidebar" style={{ overflowY: 'auto' }}>
         <div className="sidebar-header">
           <div className="logo-container" style={{ padding: '0.5rem 0' }}>
-            <img src="/logo-mono.png" alt="SOU+BUSINESS Logo" style={{ height: '32px', objectFit: 'contain' }} />
+            <img src="/logo-mono.png" alt="SOU+BUSINESS Logo" style={{ height: '44px', objectFit: 'contain' }} />
           </div>
           <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ backgroundColor: simularParceiro ? '#f59e0b' : '#1a1a1a', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
