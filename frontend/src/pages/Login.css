@@ -223,3 +223,34 @@
   color: var(--primary-red);
   font-family: monospace;
 }
+
+/* Responsive Mobile Layout */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+
+  .login-card {
+    flex-direction: column;
+  }
+
+  .login-left {
+    padding: 2rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .login-title {
+    font-size: 2rem;
+  }
+
+  .login-right {
+    padding: 2rem;
+  }
+
+  .flex.gap-6.mt-8 {
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
