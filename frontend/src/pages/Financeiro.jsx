@@ -75,10 +75,19 @@ const Financeiro = () => {
       const response = await axios.put(`${API_URL}/finance/${id}/pay`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success(response.data.message);
-      fetchTransactions();
+      if (response.data.init_point) {
+        window.open(response.data.init_point, '_blank');
+        toast.success(response.data.message || 'Redirecionando para o Mercado Pago...');
+      } else {
+        toast.success(response.data.message);
+      }
+      // Note: Transaction status will be updated via Webhook in a real scenario
     } catch (error) {
-      toast.error('Erro ao processar o pagamento no Mercado Pago.');
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error('Erro ao conectar com o Mercado Pago.');
+      }
     }
   };
 
