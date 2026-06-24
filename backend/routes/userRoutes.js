@@ -83,4 +83,27 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// PUT update user modules (permissions)
+router.put('/:id/modules', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { modules } = req.body; // array of module IDs
+
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) }, include: { company: true } });
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    if (user.company_id) {
+      await prisma.company.update({
+        where: { id: user.company_id },
+        data: { modules_allowed: JSON.stringify(modules) }
+      });
+    }
+
+    res.json({ success: true, modules });
+  } catch (error) {
+    console.error('Error updating modules:', error);
+    res.status(500).json({ error: 'Erro ao atualizar permissões' });
+  }
+});
+
 module.exports = router;

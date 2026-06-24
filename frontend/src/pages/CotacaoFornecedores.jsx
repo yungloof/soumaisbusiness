@@ -1,33 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { ClipboardList, Plus, Send, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { ClipboardList, Plus, CheckCircle, Clock, AlertCircle, Trash2 } from 'lucide-react';
 
-const fornecedoresList = [];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const statusConfig = {
+  'Rascunho': { color: '#6b7280', bg: '#f3f4f6', icon: Clock },
   'Aguardando': { color: '#f59e0b', bg: '#fef3c7', icon: Clock },
   'Respondido': { color: '#10b981', bg: '#d1fae5', icon: CheckCircle },
   'Urgente': { color: '#ea1d2c', bg: '#fee2e2', icon: AlertCircle },
 };
 
-const cotacoesIniciais = [];
-
 const CotacaoFornecedores = () => {
-  const [cotacoes, setCotacoes] = useState(cotacoesIniciais);
+  const [cotacoes, setCotacoes] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [showResultados, setShowResultados] = useState(null);
-  const [form, setForm] = useState({ item: '', quantidade: '', unidade: 'un', status: 'Aguardando', fornecedores: [] });
+  const [form, setForm] = useState({ titulo: '', itens: '', status: 'Aguardando' });
 
-  const handleAdd = () => {
-    if (!form.item || !form.quantidade) return toast.error('Preencha o item e a quantidade');
-    setCotacoes([...cotacoes, { ...form, id: Date.now(), fornecedores: [] }]);
-    setForm({ item: '', quantidade: '', unidade: 'un', status: 'Aguardando', fornecedores: [] });
-    setShowModal(false);
+  const fetchQuotations = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(`${API_URL}/quotations`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCotacoes(data);
+    } catch (error) {
+      console.error('Erro ao buscar cotações:', error);
+    }
   };
 
-  const melhorFornecedor = (cotacao) => {
-    if (!cotacao.fornecedores.length) return null;
-    return cotacao.fornecedores.reduce((a, b) => a.valor < b.valor ? a : b);
+  useEffect(() => { fetchQuotations(); }, []);
+
+  const handleAdd = async () => {
+    if (!form.titulo) return toast.error('Preencha o título da cotação');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/quotations`, {
+        titulo: form.titulo,
+        itens: [form.itens],
+        status: form.status
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Cotação criada com sucesso!');
+      setForm({ titulo: '', itens: '', status: 'Aguardando' });
+      setShowModal(false);
+      fetchQuotations();
+    } catch (error) {
+      toast.error('Erro ao criar cotação.');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_URL}/quotations/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Cotação removida.');
+      fetchQuotations();
+    } catch (error) {
+      toast.error('Erro ao remover cotação.');
+    }
+  };
+
+  const updateStatus = async (id, status) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_URL}/quotations/${id}`, { status }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(`Status atualizado: ${status}`);
+      fetchQuotations();
+    } catch (error) {
+      toast.error('Erro ao atualizar cotação.');
+    }
   };
 
   return (
@@ -46,125 +93,91 @@ const CotacaoFornecedores = () => {
         </div>
 
         {/* Summary */}
-        <div className="metrics-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '2rem' }}>
-          <div className="metric-card"><div className="metric-label blue">Total de Cotações</div><div className="metric-value">{cotacoes.length}</div></div>
-          <div className="metric-card"><div className="metric-label green">Respondidas</div><div className="metric-value">{cotacoes.filter(c => c.status === 'Respondido').length}</div></div>
-          <div className="metric-card"><div className="metric-label orange">Aguardando</div><div className="metric-value">{cotacoes.filter(c => c.status === 'Aguardando').length}</div></div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+          <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>TOTAL</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{cotacoes.length}</div>
+          </div>
+          <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--success-color)', marginBottom: '0.25rem' }}>RESPONDIDAS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success-color)' }}>{cotacoes.filter(c => c.status === 'Respondido').length}</div>
+          </div>
+          <div className="card" style={{ textAlign: 'center', padding: '1.25rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f59e0b', marginBottom: '0.25rem' }}>AGUARDANDO</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>{cotacoes.filter(c => c.status === 'Aguardando').length}</div>
+          </div>
         </div>
 
-        {/* Cards de cotações */}
+        {/* Cotações Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {cotacoes.length === 0 && (
+            <div className="card" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+              <ClipboardList size={48} style={{ margin: '0 auto 1rem', opacity: 0.2 }} />
+              <p style={{ fontWeight: 600 }}>Nenhuma cotação criada</p>
+              <p style={{ fontSize: '0.85rem' }}>Clique em "Nova Cotação" para começar.</p>
+            </div>
+          )}
           {cotacoes.map(cot => {
-            const StatusIcon = statusConfig[cot.status].icon;
-            const melhor = melhorFornecedor(cot);
+            const cfg = statusConfig[cot.status] || statusConfig['Aguardando'];
+            const StatusIcon = cfg.icon;
             return (
               <div key={cot.id} className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ width: 44, height: 44, borderRadius: 10, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ClipboardList size={22} color="var(--text-muted)" />
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 2 }}>{cot.item}</div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Quantidade: <strong>{cot.quantidade} {cot.unidade}</strong> • {cot.fornecedores.length} respostas</div>
+                      <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 2 }}>{cot.titulo}</div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        Criado em {new Date(cot.createdAt).toLocaleDateString('pt-BR')}
+                        {cot.melhorPreco && ` · Melhor preço: R$ ${cot.melhorPreco}`}
+                      </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    {melhor && (
-                      <div style={{ background: '#f0fdf4', padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid #bbf7d0' }}>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 2 }}>MELHOR PREÇO</div>
-                        <div style={{ fontWeight: 700, color: 'var(--success-color)', fontSize: '0.95rem' }}>
-                          {melhor.nome} — R$ {melhor.valor.toFixed(2)}/{cot.unidade}
-                        </div>
-                      </div>
-                    )}
-                    <span style={{
-                      display: 'flex', alignItems: 'center', gap: 4,
-                      background: statusConfig[cot.status].bg, color: statusConfig[cot.status].color,
-                      padding: '4px 12px', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700
-                    }}>
-                      <StatusIcon size={13} /> {cot.status}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600, background: cfg.bg, color: cfg.color }}>
+                      <StatusIcon size={14} /> {cot.status}
                     </span>
-                    <button
-                      onClick={() => setShowResultados(showResultados === cot.id ? null : cot.id)}
-                      style={{ padding: '0.5rem 1rem', border: '1px solid var(--border-color)', borderRadius: 6, fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', background: 'white' }}
-                    >
-                      {showResultados === cot.id ? 'Fechar' : 'Ver Respostas'}
-                    </button>
-                    <button style={{ padding: '0.5rem 1rem', background: 'var(--primary-red)', color: 'white', borderRadius: 6, fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-                      <Send size={13} /> Enviar
+                    {cot.status === 'Aguardando' && (
+                      <button onClick={() => updateStatus(cot.id, 'Respondido')} style={{ padding: '0.35rem 0.75rem', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600, border: '1px solid var(--success-color)', background: 'white', color: 'var(--success-color)', cursor: 'pointer' }}>
+                        ✓ Marcar Respondida
+                      </button>
+                    )}
+                    <button onClick={() => handleDelete(cot.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
-
-                {showResultados === cot.id && (
-                  <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                    {cot.fornecedores.length === 0 ? (
-                      <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>Nenhuma resposta recebida ainda.</p>
-                    ) : (
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr>
-                            {['Fornecedor', 'Valor Unit.', 'Valor Total', 'Prazo', 'Observações', 'Ação'].map(h => (
-                              <th key={h} style={{ textAlign: 'left', padding: '0.5rem 0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' }}>{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {cot.fornecedores.map((f, i) => (
-                            <tr key={i} style={{ background: melhor && f.nome === melhor.nome ? '#f0fdf4' : 'transparent' }}>
-                              <td style={{ padding: '0.75rem', fontWeight: 600 }}>{f.nome} {melhor && f.nome === melhor.nome && <span style={{ background: 'var(--success-color)', color: 'white', fontSize: '0.65rem', padding: '1px 6px', borderRadius: 4, marginLeft: 4 }}>MELHOR</span>}</td>
-                              <td style={{ padding: '0.75rem', fontWeight: 700, color: 'var(--primary-red)' }}>R$ {f.valor.toFixed(2)}</td>
-                              <td style={{ padding: '0.75rem' }}>R$ {(f.valor * cot.quantidade).toFixed(2)}</td>
-                              <td style={{ padding: '0.75rem' }}>{f.prazo}</td>
-                              <td style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{f.obs || '-'}</td>
-                              <td style={{ padding: '0.75rem' }}>
-                                <button style={{ padding: '4px 12px', background: 'var(--primary-red)', color: 'white', borderRadius: 6, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>Escolher</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       </div>
 
+      {/* Modal Nova Cotação */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '100%', maxWidth: 480 }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Nova Cotação</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label className="label">Item a Cotar *</label>
-                <input className="input-field" placeholder="Ex: Caixas de Pizza 40cm" value={form.item} onChange={e => setForm({ ...form, item: e.target.value })} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label className="label">Quantidade *</label>
-                  <input className="input-field" type="number" placeholder="500" value={form.quantidade} onChange={e => setForm({ ...form, quantidade: e.target.value })} />
-                </div>
-                <div>
-                  <label className="label">Unidade</label>
-                  <select className="input-field" value={form.unidade} onChange={e => setForm({ ...form, unidade: e.target.value })}>
-                    {['un', 'kg', 'cx', 'L', 'pct'].map(u => <option key={u}>{u}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="label">Status</label>
-                <select className="input-field" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-                  {Object.keys(statusConfig).map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setShowModal(false)}>
+          <div className="card" style={{ width: '100%', maxWidth: '500px', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Nova Cotação</h3>
+            <div className="form-group">
+              <label className="label">Título / Item Principal</label>
+              <input type="text" className="input-field" placeholder="Ex: Farinha de Trigo 50kg" value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})} />
             </div>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-              <button className="btn-primary" onClick={handleAdd}>Criar Cotação</button>
-              <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '0.75rem 1.5rem', border: '1px solid var(--border-color)', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
+            <div className="form-group">
+              <label className="label">Detalhes / Observações</label>
+              <textarea className="input-field" placeholder="Quantidade, especificações, prazo..." rows="3" value={form.itens} onChange={e => setForm({...form, itens: e.target.value})} />
+            </div>
+            <div className="form-group">
+              <label className="label">Prioridade</label>
+              <select className="input-field" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
+                <option value="Aguardando">Normal</option>
+                <option value="Urgente">Urgente</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <button className="btn-primary" onClick={handleAdd} style={{ flex: 1 }}>Criar Cotação</button>
+              <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)', background: 'white', cursor: 'pointer', fontWeight: 600 }}>Cancelar</button>
             </div>
           </div>
         </div>

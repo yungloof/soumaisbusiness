@@ -55,9 +55,29 @@ const CadastroFuncionario = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success('Funcionário cadastrado com sucesso!');
+    if (!formData.emailPessoal) return toast.error('O email é obrigatório para criar o acesso.');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: formData.emailPessoal,
+          password: '123456',
+          role: 'SUPERVISOR'
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Erro ao cadastrar');
+      toast.success('Funcionário cadastrado com sucesso! Senha padrão: 123456');
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (

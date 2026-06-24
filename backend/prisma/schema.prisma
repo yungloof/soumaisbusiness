@@ -16,6 +16,9 @@ model Company {
   suppliers            Supplier[]
   tickets              Ticket[]
   financial_transactions FinancialTransaction[]
+  products             Product[]
+  manual_orders        ManualOrder[]
+  quotations           Quotation[]
 
   @@map("companies")
 }
@@ -73,4 +76,46 @@ model FinancialTransaction {
   createdAt   DateTime @default(now())
 
   @@map("financial_transactions")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  descricao   String?
+  valor       String
+  categoria   String?
+  companyId   Int?
+  company     Company? @relation(fields: [companyId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@map("products")
+}
+
+model ManualOrder {
+  id          Int      @id @default(autoincrement())
+  cpf         String?
+  itens       String
+  status      String   @default("Novo")
+  total       String?
+  companyId   Int?
+  company     Company? @relation(fields: [companyId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("manual_orders")
+}
+
+model Quotation {
+  id            Int      @id @default(autoincrement())
+  titulo        String
+  fornecedores  String?  // JSON string array of supplier names
+  itens         String   // JSON string of items
+  status        String   @default("Rascunho")
+  melhorPreco   String?
+  companyId     Int?
+  company       Company? @relation(fields: [companyId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("quotations")
 }

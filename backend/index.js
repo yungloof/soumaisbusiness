@@ -53,12 +53,18 @@ const ticketRoutes = require('./routes/ticketRoutes');
 const financeRoutes = require('./routes/financeRoutes');
 const userRoutes = require('./routes/userRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const quotationRoutes = require('./routes/quotationRoutes');
 
 app.use('/api/suppliers', authenticateToken, supplierRoutes);
 app.use('/api/tickets', authenticateToken, ticketRoutes);
 app.use('/api/finance', authenticateToken, financeRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/dashboard', authenticateToken, dashboardRoutes);
+app.use('/api/products', authenticateToken, productRoutes);
+app.use('/api/orders', authenticateToken, orderRoutes);
+app.use('/api/quotations', authenticateToken, quotationRoutes);
 
 
 // Auth Route

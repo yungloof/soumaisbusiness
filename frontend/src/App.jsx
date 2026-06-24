@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import DashboardLayout from './components/DashboardLayout';
+import PrivateRoute from './components/PrivateRoute';
 import DashboardHome from './pages/DashboardHome';
 import CadastroFuncionario from './pages/CadastroFuncionario';
 import CadastroCliente from './pages/CadastroCliente';
@@ -27,7 +28,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         
-        <Route path="/master" element={<DashboardLayout />}>
+        <Route path="/master" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
           <Route index element={<DashboardHome />} />
           <Route path="supervisores" element={<Supervisores />} />
           <Route path="clientes" element={<Clientes />} />
